@@ -1,4 +1,4 @@
-name: Manual TAGS Run WEB Tests
+name: Manual TAGS Run WEB Tests Desafio
 run-name: Manual - Web Tests Run 🚀
 on: 
   workflow_dispatch: 
