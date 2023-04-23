@@ -5,14 +5,17 @@ on:
     inputs: 
       tag:
         type: string
-        description: Qual é a Browser a ser executado?
+        description: Qual é a TAG a ser executada?
         required: true
 
 jobs:
   web-test:
     runs-on: ubuntu-20.04
     permissions: write-all
-
+    strategy: 
+      matrix: 
+        browser: [chromium, firefox, webkit]
+      fail-fast: false
     steps:
       - name: Checkout
         uses: actions/checkout@v3
@@ -38,13 +41,13 @@ jobs:
       - name: Run RF WEB Tests
         run: |
           robot -d ./results -v HEADLESS:true \
-          -v BROWSER:${{ inputs.tag }} tests
+          -v BROWSER:${{ matrix.browser }} -i ${{ inputs.tag }} tests
       
       - name: Upload Tests results
         if: always()
         uses: actions/upload-artifact@v3
         with: 
-          name: results-${{ inputs.tag }}
+          name: results-${{ matrix.browser }}
           path: ./results
           if-no-files-found: ignore
           retention-days: 2
@@ -53,12 +56,12 @@ jobs:
         if: always()
         uses: actions/download-artifact@v1
         with: 
-          name: results-${{ inputs.tag }}
+          name: results-${{ matrix.browser }}
 
       - name: Send Report
         if: always()
         uses: joonvena/robotframework-reporter-action@v2.1
         with: 
-          report_path: results-${{ inputs.tag }}
+          report_path: results-${{ matrix.browser }}
           gh_access_token: ${{ secrets.GITHUB_TOKEN }}
           show_passed_tests: false
